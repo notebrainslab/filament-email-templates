@@ -50,8 +50,10 @@ class TemplateRenderer
                 dispatch($job);
             }
         } catch (Exception $e) {
-            // Capture any exceptions during dispatch so it doesn't break the application
-            Log::error('Event Template Dispatch Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            // IMPORTANT: Do NOT use Log::error() here — it fires Illuminate\Log\Events\MessageLogged
+            // which would re-trigger this wildcard listener, causing an infinite loop.
+            // Use native PHP error_log() instead which does not dispatch Laravel events.
+            error_log('FilamentEmailTemplates: Event dispatch error for [' . $eventName . ']: ' . $e->getMessage());
         }
     }
 }

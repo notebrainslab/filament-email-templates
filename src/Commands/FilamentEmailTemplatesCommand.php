@@ -15,11 +15,11 @@ class FilamentEmailTemplatesCommand extends Command
         $this->comment('Installing Filament Email Templates plugin...');
 
         $this->call('vendor:publish', [
-            '--tag' => 'filament-email-templates-migrations',
+            '--tag' => 'notebrainslab-filament-email-templates-migrations',
         ]);
 
         $this->call('vendor:publish', [
-            '--tag' => 'filament-email-templates-config',
+            '--tag' => 'notebrainslab-filament-email-templates-config',
         ]);
 
         if ($this->confirm('Would you like to run the migrations now?')) {
