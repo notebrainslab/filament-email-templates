@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('filament_email_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('key')->unique()->index();
+            $table->string('key')->index();
             $table->string('locale')->default('en')->index();
             $table->string('subject');
             
@@ -23,8 +23,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['key', 'locale']);
-
-            $table->timestamps();
         });
     }
 

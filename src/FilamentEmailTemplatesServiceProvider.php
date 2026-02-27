@@ -5,7 +5,6 @@ namespace NoteBrainsLab\FilamentEmailTemplates;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use NoteBrainsLab\FilamentEmailTemplates\Commands\FilamentEmailTemplatesCommand;
-use NoteBrainsLab\FilamentEmailTemplates\Providers\EventServiceProvider;
 
 class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
 {
@@ -23,6 +22,7 @@ class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
             ->hasTranslations()
             ->hasMigration('create_filament_email_templates_table')
             ->hasMigration('create_filament_email_template_exceptions_table')
+            ->hasMigration('create_filament_email_themes_table')
             ->hasCommand(FilamentEmailTemplatesCommand::class);
     }
 
