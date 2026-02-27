@@ -7,6 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplateException;
 
 class EmailTemplateExceptionResource extends Resource
@@ -31,7 +32,7 @@ class EmailTemplateExceptionResource extends Resource
         return false;
     }
 
-    public static function canEdit(Model|\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
