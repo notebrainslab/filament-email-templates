@@ -3,8 +3,9 @@
 namespace NoteBrainsLab\FilamentEmailTemplates\Services;
 
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate;
 use NoteBrainsLab\FilamentEmailTemplates\Jobs\SendEmailTemplateJob;
 
@@ -16,6 +17,11 @@ class TemplateRenderer
     public function handleEvent(string $eventName, array $data): void
     {
         try {
+            // Guard: skip if migrations haven't been run yet
+            if (! Schema::hasTable((new EmailTemplate())->getTable())) {
+                return;
+            }
+
             // Find all active templates matching this event class
             $templates = EmailTemplate::where('event_class', $eventName)
                 ->where('is_active', true)
