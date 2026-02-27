@@ -15,9 +15,9 @@ return new class extends Migration
             $table->string('locale')->default('en')->index();
             $table->string('subject');
             
-            // Content
-            $table->longText('body_html')->nullable();
-            $table->json('body_json')->nullable(); // Unlayer design JSON
+            // Content (will be injected into the theme)
+            $table->longText('body')->nullable();
+            $table->string('mail_class')->nullable(); // Track the generated Mail class name
 
             $table->boolean('is_active')->default(true);
             $table->timestamps();

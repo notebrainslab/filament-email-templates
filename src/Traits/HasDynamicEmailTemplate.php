@@ -75,20 +75,17 @@ trait HasDynamicEmailTemplate
         }
 
         $subject = $this->parseTemplateContent($template->subject, $data);
-        $bodyHtml = $this->parseTemplateContent($template->body_html, $data);
+        $bodyContent = $this->parseTemplateContent($template->body ?? '', $data);
 
         // Handle Theme
         $theme = $template->theme ?? \NoteBrainsLab\FilamentEmailTemplates\Models\EmailTheme::where('is_default', true)->first();
         
-        if ($theme) {
-            $fullHtml = '';
-            if ($theme->custom_css) {
-                $fullHtml .= '<style>' . $theme->custom_css . '</style>';
-            }
-            $fullHtml .= $theme->header_html;
-            $fullHtml .= $bodyHtml;
-            $fullHtml .= $theme->footer_html;
-            $bodyHtml = $fullHtml;
+        if ($theme && $theme->body_html) {
+            // Theme acts as the shell/design, bodyContent is injected into it.
+            // Expected placeholder in theme: ##body_content##
+            $bodyHtml = str_replace('##body_content##', $bodyContent, $theme->body_html);
+        } else {
+            $bodyHtml = $bodyContent;
         }
 
         $this->subject($subject);

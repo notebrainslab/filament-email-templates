@@ -11,9 +11,8 @@ return new class extends Migration
         Schema::create('filament_email_themes', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->longText('header_html')->nullable();
-            $table->longText('footer_html')->nullable();
-            $table->longText('custom_css')->nullable();
+            $table->longText('body_html')->nullable(); // Final rendered design with placeholder
+            $table->json('body_json')->nullable(); // Unlayer JSON state
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });

@@ -2,7 +2,7 @@
 
 namespace NoteBrainsLab\FilamentEmailTemplates\Forms\Components;
 
-use Filament\Schemas\Components\Field;
+use Filament\Forms\Components\Field;
 
 class UnlayerEditor extends Field
 {

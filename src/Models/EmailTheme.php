@@ -13,6 +13,7 @@ class EmailTheme extends Model
 
     protected $casts = [
         'is_default' => 'boolean',
+        'body_json' => 'array',
     ];
 
     public function templates(): HasMany

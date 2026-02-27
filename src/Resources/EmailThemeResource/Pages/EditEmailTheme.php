@@ -16,4 +16,15 @@ class EditEmailTheme extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['unlayer_state'])) {
+            $data['body_json'] = $data['unlayer_state']['json'] ?? null;
+            $data['body_html'] = $data['unlayer_state']['html'] ?? null;
+            unset($data['unlayer_state']);
+        }
+
+        return $data;
+    }
 }

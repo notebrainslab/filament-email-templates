@@ -21,7 +21,7 @@ class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
             ->hasViews('filament-email-templates')
             ->hasTranslations()
             ->hasMigration('create_filament_email_templates_table')
-            ->hasMigration('create_filament_email_template_exceptions_table')
+
             ->hasMigration('create_filament_email_themes_table')
             ->hasCommand(FilamentEmailTemplatesCommand::class);
     }

@@ -14,13 +14,7 @@ class EmailTemplate extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'body_json' => 'array',
     ];
-
-    public function exceptions(): HasMany
-    {
-        return $this->hasMany(EmailTemplateException::class, 'email_template_id');
-    }
 
     public function theme(): BelongsTo
     {

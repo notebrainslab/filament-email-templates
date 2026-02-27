@@ -8,10 +8,12 @@ use Filament\Schemas\Components;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Hidden;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTheme;
+use NoteBrainsLab\FilamentEmailTemplates\Forms\Components\UnlayerEditor;
 use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailThemeResource\Pages;
 
 class EmailThemeResource extends Resource
@@ -28,26 +30,34 @@ class EmailThemeResource extends Resource
             ->components([
                 Components\Section::make('General')
                     ->schema([
-                        Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->unique(ignoreRecord: true),
-                        Components\Toggle::make('is_default')
+                        Toggle::make('is_default')
                             ->label('Default Theme')
                             ->helperText('This theme will be used if no theme is assigned to a template.'),
-                    ]),
+                    ])->columns(2),
 
-                Components\Section::make('Layout')
+                Components\Section::make('Design')
                     ->schema([
-                        Components\Textarea::make('header_html')
-                            ->label('Header HTML')
-                            ->rows(10),
-                        Components\Textarea::make('footer_html')
-                            ->label('Footer HTML')
-                            ->rows(10),
-                        Components\Textarea::make('custom_css')
-                            ->label('Custom CSS')
-                            ->rows(5)
-                            ->helperText('Styles added within <style> tags.'),
+                        Components\Placeholder::make('design_help')
+                            ->content('Design the shell/layout for your emails here. Use ##body_content## as a placeholder for where the template content will be injected.'),
+                        
+                        UnlayerEditor::make('unlayer_state')
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state([
+                                        'json' => $record->body_json,
+                                        'html' => $record->body_html,
+                                    ]);
+                                }
+                            })
+                            ->dehydrated(false)
+                            ->columnSpanFull()
+                            ->label('Theme Designer (Unlayer)'),
+                        
+                        Hidden::make('body_html'),
+                        Hidden::make('body_json'),
                     ]),
             ]);
     }

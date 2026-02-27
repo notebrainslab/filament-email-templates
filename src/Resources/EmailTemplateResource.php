@@ -10,13 +10,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\ViewField;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\RichEditor;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate;
-use NoteBrainsLab\FilamentEmailTemplates\Forms\Components\UnlayerEditor;
+use NoteBrainsLab\FilamentEmailTemplates\Support\MailClassBuilder;
 use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\Pages;
-use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\RelationManagers;
+use Filament\Notifications\Notification;
 
 class EmailTemplateResource extends Resource
 {
@@ -50,17 +52,17 @@ class EmailTemplateResource extends Resource
                     ->tabs([
                         Components\Tabs\Tab::make('General')
                             ->schema([
-                                Components\TextInput::make('name')
+                                TextInput::make('name')
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255),
                                 
-                                Components\TextInput::make('key')
+                                TextInput::make('key')
                                     ->required()
-                                    ->helperText('Unique key for this template, e.g., order_confirmation')
+                                    ->helperText('Unique key for this template, used for the Mail Class name.')
                                     ->maxLength(255),
 
-                                Components\Select::make('locale')
+                                Select::make('locale')
                                     ->options([
                                         'en' => 'English',
                                         'es' => 'Spanish',
@@ -70,47 +72,35 @@ class EmailTemplateResource extends Resource
                                     ->default('en')
                                     ->required(),
 
-                                Components\TextInput::make('subject')
+                                TextInput::make('subject')
                                     ->required()
                                     ->helperText('Supports tokens like ##user.name## or ##config.app.name##')
                                     ->maxLength(255)
                                     ->columnSpanFull(),
                                 
-                                Components\Toggle::make('is_active')
+                                Toggle::make('is_active')
                                     ->default(true),
 
-                                Components\Select::make('theme_id')
+                                Select::make('theme_id')
                                     ->relationship('theme', 'name')
-                                    ->nullable()
-                                    ->helperText('Select a theme/layout for this template.'),
+                                    ->required()
+                                    ->helperText('Select a design theme for this template.'),
                             ])->columns(2),
 
-                        Components\Tabs\Tab::make('Design')
+                        Components\Tabs\Tab::make('Content')
                             ->schema([
-                                Components\Placeholder::make('token_help')
+                                Placeholder::make('token_help')
                                     ->label('Available Tokens')
-                                    ->content('Use ##model.attribute## or ##config.key.name## in your design.'),
+                                    ->content('Use ##model.attribute## or ##config.key.name## in your content.'),
 
-                                UnlayerEditor::make('unlayer_state')
-                                    ->afterStateHydrated(function ($component, $record) {
-                                        if ($record) {
-                                            $component->state([
-                                                'json' => $record->body_json,
-                                                'html' => $record->body_html,
-                                            ]);
-                                        }
-                                    })
-                                    ->dehydrated(false)
-                                    ->columnSpanFull()
-                                    ->label('Visual Builder (Unlayer)'),
-                                
-                                Components\Hidden::make('body_html'),
-                                Components\Hidden::make('body_json'),
+                                RichEditor::make('body')
+                                    ->label('Email Content Body')
+                                    ->columnSpanFull(),
                             ]),
                         
                         Components\Tabs\Tab::make('Preview')
                             ->schema([
-                                Components\ViewField::make('preview')
+                                ViewField::make('preview')
                                     ->view('filament-email-templates::forms.components.preview')
                                     ->columnSpanFull(),
                             ]),
@@ -137,6 +127,11 @@ class EmailTemplateResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('mail_class')
+                    ->label('Mail Class')
+                    ->badge()
+                    ->color('success')
+                    ->placeholder('Not Generated'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -153,6 +148,26 @@ class EmailTemplateResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make(),
+                Tables\Actions\Action::make('build_class')
+                    ->label('Build Class')
+                    ->icon('heroicon-m-code-bracket')
+                    ->color('success')
+                    ->action(function (EmailTemplate $record) {
+                        $success = MailClassBuilder::build($record);
+                        
+                        if ($success) {
+                            Notification::make()
+                                ->title('Mail Class Created')
+                                ->body("Class generated successfully in App\Mail\VisualBuilder\EmailTemplates")
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Class Already Exists')
+                                ->warning()
+                                ->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
@@ -164,7 +179,7 @@ class EmailTemplateResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\ExceptionsRelationManager::class,
+            //
         ];
     }
 

@@ -5,7 +5,7 @@ namespace NoteBrainsLab\FilamentEmailTemplates;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource;
-use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateExceptionResource;
+
 
 class FilamentEmailTemplatesPlugin implements Plugin
 {
@@ -18,7 +18,6 @@ class FilamentEmailTemplatesPlugin implements Plugin
     {
         $panel->resources([
             EmailTemplateResource::class,
-            EmailTemplateExceptionResource::class,
             Resources\EmailThemeResource::class,
         ]);
     }
