@@ -4,7 +4,10 @@ namespace NoteBrainsLab\FilamentEmailTemplates\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components;
+use Filament\Schemas\Components;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
@@ -70,7 +73,7 @@ class EmailThemeResource extends Resource
                 Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                Actions\BulkActionGroup::make([
                     Actions\DeleteBulkAction::make(),
                 ]),
             ]);
