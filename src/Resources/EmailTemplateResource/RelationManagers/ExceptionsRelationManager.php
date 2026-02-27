@@ -3,7 +3,7 @@
 namespace NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\RelationManagers;
 
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components as SchemaComponents;
+use Filament\Infolists\Components as InfolistComponents;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -27,17 +27,17 @@ class ExceptionsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                SchemaComponents\Section::make('Exception Details')
+                InfolistComponents\Section::make('Exception Details')
                     ->schema([
-                        SchemaComponents\TextEntry::make('error_message')
+                        InfolistComponents\TextEntry::make('error_message')
                             ->label('Error Message')
                             ->columnSpanFull()
                             ->color('danger')
                             ->weight('bold'),
-                        SchemaComponents\KeyValueEntry::make('payload')
+                        InfolistComponents\KeyValueEntry::make('payload')
                             ->label('Context Data')
                             ->columnSpanFull(),
-                        SchemaComponents\TextEntry::make('trace')
+                        InfolistComponents\TextEntry::make('trace')
                             ->label('Stack Trace')
                             ->columnSpanFull()
                             ->extraAttributes(['class' => 'whitespace-pre-wrap font-mono text-xs']),

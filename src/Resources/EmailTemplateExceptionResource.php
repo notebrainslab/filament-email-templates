@@ -4,7 +4,7 @@ namespace NoteBrainsLab\FilamentEmailTemplates\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components as SchemaComponents;
+use Filament\Infolists\Components as InfolistComponents;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
@@ -17,7 +17,7 @@ class EmailTemplateExceptionResource extends Resource
     protected static ?string $model = EmailTemplateException::class;
     
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-exclamation-triangle';
-    protected static ?string $navigationGroup = 'Email Templates';
+    protected static string|\UnitEnum|null $navigationGroup = 'Email Templates';
     protected static ?int $navigationSort = 2;
     
     public static function getModelLabel(): string
@@ -54,21 +54,21 @@ class EmailTemplateExceptionResource extends Resource
     {
         return $schema
             ->components([
-                SchemaComponents\Section::make('Exception Details')
+                InfolistComponents\Section::make('Exception Details')
                     ->schema([
-                        SchemaComponents\TextEntry::make('template.key')
+                        InfolistComponents\TextEntry::make('template.key')
                             ->label('Template Key'),
-                        SchemaComponents\TextEntry::make('template.locale')
+                        InfolistComponents\TextEntry::make('template.locale')
                             ->label('Locale'),
-                        SchemaComponents\TextEntry::make('error_message')
+                        InfolistComponents\TextEntry::make('error_message')
                             ->label('Error Message')
                             ->columnSpanFull()
                             ->color('danger')
                             ->weight('bold'),
-                        SchemaComponents\KeyValueEntry::make('payload')
+                        InfolistComponents\KeyValueEntry::make('payload')
                             ->label('Context Data')
                             ->columnSpanFull(),
-                        SchemaComponents\TextEntry::make('trace')
+                        InfolistComponents\TextEntry::make('trace')
                             ->label('Stack Trace')
                             ->formatStateUsing(fn ($state) => $state)
                             ->columnSpanFull()

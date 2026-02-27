@@ -4,7 +4,7 @@ namespace NoteBrainsLab\FilamentEmailTemplates\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components;
+use Filament\Forms\Components;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
@@ -18,7 +18,7 @@ class EmailTemplateResource extends Resource
     protected static ?string $model = EmailTemplate::class;
     
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope-open';
-    protected static ?string $navigationGroup = 'Email Templates';
+    protected static string|\UnitEnum|null $navigationGroup = 'Email Templates';
     protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'name';
 
