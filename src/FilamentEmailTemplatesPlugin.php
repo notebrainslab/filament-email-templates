@@ -19,12 +19,15 @@ class FilamentEmailTemplatesPlugin implements Plugin
         $panel->resources([
             EmailTemplateResource::class,
             EmailTemplateExceptionResource::class,
+            Resources\EmailThemeResource::class,
         ]);
     }
 
     public function boot(Panel $panel): void
     {
-        // Setup any dependencies
+        if (config('filament-email-templates.register_notifications')) {
+            app(\NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplates::class)->registerDefaultNotifications();
+        }
     }
 
     public static function make(): static

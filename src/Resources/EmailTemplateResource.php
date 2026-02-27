@@ -2,20 +2,25 @@
 
 namespace NoteBrainsLab\FilamentEmailTemplates\Resources;
 
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate;
 use NoteBrainsLab\FilamentEmailTemplates\Forms\Components\UnlayerEditor;
+use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\Pages;
+use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\RelationManagers;
 
 class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
     
-    protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope-open';
+    protected static ?string $navigationGroup = 'Email Templates';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function getModelLabel(): string
     {
@@ -27,57 +32,61 @@ class EmailTemplateResource extends Resource
         return __('Email Templates');
     }
 
-    public static function form(Form $form): Form
+    public static function getNavigationBadge(): ?string
     {
-        return $form
-            ->schema([
-                Forms\Components\Tabs::make('Tabs')
+        return static::getModel()::count();
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Components\Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('General')
+                        Components\Tabs\Tab::make('General')
                             ->schema([
-                                Forms\Components\TextInput::make('name')
+                                Components\TextInput::make('name')
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255),
                                 
-                                Forms\Components\TextInput::make('event_class')
+                                Components\TextInput::make('key')
                                     ->required()
-                                    ->helperText('Full class name of the Laravel event. E.g., App\Events\OrderPlaced')
+                                    ->helperText('Unique key for this template, e.g., order_confirmation')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('subject')
-                                    ->required()
-                                    ->helperText('Supports Blade variables from the event.')
-                                    ->maxLength(255),
-                                
-                                Forms\Components\TagsInput::make('recipients')
-                                    ->helperText('Add static emails or Blade variables like {{ $user->email }}')
-                                    ->placeholder('Add recipient...')
+                                Components\Select::make('locale')
+                                    ->options([
+                                        'en' => 'English',
+                                        'es' => 'Spanish',
+                                        'fr' => 'French',
+                                        'de' => 'German',
+                                    ])
+                                    ->default('en')
                                     ->required(),
-                                
-                                Forms\Components\TagsInput::make('cc')
-                                    ->helperText('Add CC emails or Blade variables.'),
-                                    
-                                Forms\Components\TagsInput::make('bcc')
-                                    ->helperText('Add BCC emails or Blade variables.'),
 
-                                Forms\Components\TagsInput::make('attachments')
-                                    ->helperText('Add full paths or Blade expressions like {{ storage_path($invoice->path) }}'),
-
-                                Forms\Components\TextInput::make('delay_minutes')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->helperText('Delay sending by minutes after event is fired (0 for immediate).'),
+                                Components\TextInput::make('subject')
+                                    ->required()
+                                    ->helperText('Supports tokens like ##user.name## or ##config.app.name##')
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
                                 
-                                Forms\Components\Toggle::make('is_active')
+                                Components\Toggle::make('is_active')
                                     ->default(true),
+
+                                Components\Select::make('theme_id')
+                                    ->relationship('theme', 'name')
+                                    ->nullable()
+                                    ->helperText('Select a theme/layout for this template.'),
                             ])->columns(2),
 
-                        Forms\Components\Tabs\Tab::make('Design')
+                        Components\Tabs\Tab::make('Design')
                             ->schema([
-                                Forms\Components\ViewField::make('unlayer_state')
-                                    ->view('filament-email-templates::forms.components.unlayer-editor')
-                                    // Save state using custom logic since it maps to two DB fields (json, html)
+                                Components\Placeholder::make('token_help')
+                                    ->label('Available Tokens')
+                                    ->content('Use ##model.attribute## or ##config.key.name## in your design.'),
+
+                                UnlayerEditor::make('unlayer_state')
                                     ->afterStateHydrated(function ($component, $record) {
                                         if ($record) {
                                             $component->state([
@@ -90,8 +99,15 @@ class EmailTemplateResource extends Resource
                                     ->columnSpanFull()
                                     ->label('Visual Builder (Unlayer)'),
                                 
-                                Forms\Components\Hidden::make('body_html'),
-                                Forms\Components\Hidden::make('body_json'),
+                                Components\Hidden::make('body_html'),
+                                Components\Hidden::make('body_json'),
+                            ]),
+                        
+                        Components\Tabs\Tab::make('Preview')
+                            ->schema([
+                                Components\ViewField::make('preview')
+                                    ->view('filament-email-templates::forms.components.preview')
+                                    ->columnSpanFull(),
                             ]),
                     ])
                     ->columnSpanFull()
@@ -105,10 +121,14 @@ class EmailTemplateResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('event_class')
+                Tables\Columns\TextColumn::make('key')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subject'),
+                Tables\Columns\TextColumn::make('locale')
+                    ->badge()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('subject')
+                    ->limit(50),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
@@ -118,16 +138,29 @@ class EmailTemplateResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('locale')
+                    ->options([
+                        'en' => 'English',
+                        'es' => 'Spanish',
+                        'fr' => 'French',
+                        'de' => 'German',
+                    ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\ExceptionsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

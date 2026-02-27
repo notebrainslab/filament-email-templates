@@ -4,6 +4,7 @@ namespace NoteBrainsLab\FilamentEmailTemplates\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailTemplate extends Model
 {
@@ -12,17 +13,17 @@ class EmailTemplate extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'recipients' => 'array',
-        'cc' => 'array',
-        'bcc' => 'array',
-        'attachments' => 'array',
         'is_active' => 'boolean',
-        'delay_minutes' => 'integer',
         'body_json' => 'array',
     ];
 
     public function exceptions(): HasMany
     {
         return $this->hasMany(EmailTemplateException::class, 'email_template_id');
+    }
+
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(EmailTheme::class, 'theme_id');
     }
 }

@@ -11,18 +11,18 @@ return new class extends Migration
         Schema::create('filament_email_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('event_class')->nullable()->index();
+            $table->string('key')->unique()->index();
+            $table->string('locale')->default('en')->index();
             $table->string('subject');
-            $table->json('recipients')->nullable(); // Using json to store list or blade expressions
-            $table->json('cc')->nullable();
-            $table->json('bcc')->nullable();
-            $table->json('attachments')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->integer('delay_minutes')->default(0);
             
             // Content
             $table->longText('body_html')->nullable();
             $table->json('body_json')->nullable(); // Unlayer design JSON
+
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+
+            $table->unique(['key', 'locale']);
 
             $table->timestamps();
         });

@@ -29,8 +29,6 @@ class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         parent::packageRegistered();
-        
-        $this->app->register(EventServiceProvider::class);
     }
 
     public function packageBooted(): void

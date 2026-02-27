@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('filament_email_themes', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->longText('header_html')->nullable();
+            $table->longText('footer_html')->nullable();
+            $table->longText('custom_css')->nullable();
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::table('filament_email_templates', function (Blueprint $table) {
+            $table->foreignId('theme_id')->nullable()->constrained('filament_email_themes')->nullOnDelete();
+        });
+    }
+
+    public function down()
+    {
+        Schema::table('filament_email_templates', function (Blueprint $table) {
+            $table->dropForeign(['theme_id']);
+            $table->dropColumn('theme_id');
+        });
+        Schema::dropIfExists('filament_email_themes');
+    }
+};

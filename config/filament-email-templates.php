@@ -12,4 +12,16 @@ return [
     |
     */
     'unlayer_project_id' => env('UNLAYER_PROJECT_ID', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notification Overrides
+    |--------------------------------------------------------------------------
+    |
+    | When set to true, the plugin will automatically override the default 
+    | Laravel Verify Email and Reset Password notifications to use 
+    | templates from the database (auth.verify_email, auth.reset_password).
+    |
+    */
+    'register_notifications' => env('FILAMENT_EMAIL_TEMPLATES_OVERRIDE_AUTH', true),
 ];
