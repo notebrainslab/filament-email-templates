@@ -1,0 +1,39 @@
+/vendor/
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel 4 specific
+bootstrap/compiled.php
+app/storage/
+
+# Laravel 5 & Lumen specific
+public/storage
+public/hot
+
+# Laravel 5 & Lumen specific - app directory
+app/Providers/
+!app/Providers/Filament/
+
+# Laravel 5 & Lumen specific - framework cache
+storage/*.key
+storage/framework/cache/data/
+storage/framework/cache/data/*
+storage/framework/cache/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+
+# Env
+.env
+.env.backup
+.env.testing
+
+# phpunit auth/logs
+.phpunit.result.cache
+
+# IDEs
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace

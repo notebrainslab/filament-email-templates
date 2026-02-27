@@ -1,0 +1,67 @@
+{
+    "name": "notebrainslab/filament-email-templates",
+    "description": "A powerful and flexible Email Template Management plugin for Filament v4 and v5.",
+    "keywords": [
+        "filament",
+        "laravel",
+        "email",
+        "templates",
+        "events",
+        "filament-plugin"
+    ],
+    "homepage": "https://github.com/notebrainslab/filament-email-templates",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "NoteBrainsLab",
+            "email": "info@notebrainslab.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^4.0|^5.0",
+        "spatie/laravel-package-tools": "^1.16",
+        "illuminate/contracts": "^11.0|^12.0",
+        "illuminate/mail": "^11.0|^12.0",
+        "illuminate/support": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NoteBrainsLab\\FilamentEmailTemplates\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NoteBrainsLab\\FilamentEmailTemplates\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "./vendor/bin/pest",
+        "test-coverage": "./vendor/bin/pest --coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NoteBrainsLab\\FilamentEmailTemplates\\FilamentEmailTemplatesServiceProvider"
+            ],
+            "aliases": {
+                "FilamentEmailTemplates": "NoteBrainsLab\\FilamentEmailTemplates\\Facades\\FilamentEmailTemplates"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
