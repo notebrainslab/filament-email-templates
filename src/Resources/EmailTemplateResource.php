@@ -16,17 +16,25 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
 use NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate;
-use NoteBrainsLab\FilamentEmailTemplates\Support\MailClassBuilder;
 use NoteBrainsLab\FilamentEmailTemplates\Resources\EmailTemplateResource\Pages;
-use Filament\Notifications\Notification;
-
 class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
     
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope-open';
-    protected static string|\UnitEnum|null $navigationGroup = 'Email Templates';
-    protected static ?int $navigationSort = 1;
+    public static function getNavigationGroup(): ?string
+    {
+        return \NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplatesPlugin::get()->getNavigationGroup();
+    }
+
+    public static function getNavigationIcon(): string|\BackedEnum|null
+    {
+        return \NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplatesPlugin::get()->getNavigationIcon() ?? 'heroicon-o-envelope-open';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return \NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplatesPlugin::get()->getNavigationSort();
+    }
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getModelLabel(): string
@@ -59,14 +67,14 @@ class EmailTemplateResource extends Resource
                                 
                                 TextInput::make('key')
                                     ->required()
-                                    ->helperText('Unique key for this template, used for the Mail Class name.')
+                                    ->helperText('Unique key for this template, used to reference from Trait.')
                                     ->maxLength(255),
 
 
 
                                 TextInput::make('subject')
                                     ->required()
-                                    ->helperText('Supports tokens like ##user.name## or ##config.app.name##')
+                                    ->helperText('Supports tokens like {{user_name}} or {{order_id}}')
                                     ->maxLength(255)
                                     ->columnSpanFull(),
                                 
@@ -88,7 +96,7 @@ class EmailTemplateResource extends Resource
                             ->schema([
                                 Placeholder::make('token_help')
                                     ->label('Available Tokens')
-                                    ->content('Use ##model.attribute## or ##config.key.name## in your content.'),
+                                    ->content('Use {{user_name}}, {{order_id}}, etc. in your content.'),
 
                                 RichEditor::make('body')
                                     ->label('Email Content Body')
@@ -123,11 +131,7 @@ class EmailTemplateResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mail_class')
-                    ->label('Mail Class')
-                    ->badge()
-                    ->color('success')
-                    ->placeholder('Not Generated'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -138,26 +142,7 @@ class EmailTemplateResource extends Resource
             ])
             ->actions([
                 Actions\EditAction::make(),
-                Actions\Action::make('build_class')
-                    ->label('Build Class')
-                    ->icon('heroicon-m-code-bracket')
-                    ->color('success')
-                    ->action(function (EmailTemplate $record) {
-                        $success = MailClassBuilder::build($record);
-                        
-                        if ($success) {
-                            Notification::make()
-                                ->title('Mail Class Created')
-                                ->body("Class generated successfully in App\Mail\VisualBuilder\EmailTemplates")
-                                ->success()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title('Class Already Exists')
-                                ->warning()
-                                ->send();
-                        }
-                    }),
+
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([

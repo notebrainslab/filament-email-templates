@@ -16,7 +16,7 @@ return new class extends Migration
             
             // Content (will be injected into the theme)
             $table->longText('body')->nullable();
-            $table->string('mail_class')->nullable(); // Track the generated Mail class name
+
 
             $table->boolean('is_active')->default(true);
             $table->timestamps();

@@ -21,9 +21,21 @@ class EmailThemeResource extends Resource
 {
     protected static ?string $model = EmailTheme::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-swatch';
-    protected static string|\UnitEnum|null $navigationGroup = 'Email Templates';
-    protected static ?int $navigationSort = 3;
+    public static function getNavigationIcon(): string|\BackedEnum|null
+    {
+        return 'heroicon-o-swatch';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return \NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplatesPlugin::get()->getNavigationGroup();
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        $sort = \NoteBrainsLab\FilamentEmailTemplates\FilamentEmailTemplatesPlugin::get()->getNavigationSort();
+        return $sort !== null ? $sort + 1 : 2;
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -42,7 +54,7 @@ class EmailThemeResource extends Resource
                 Components\Section::make('Design')
                     ->schema([
                         Placeholder::make('design_help')
-                            ->content('Design the shell/layout for your emails. In the Unlayer Designer, add a "Custom HTML" block and place ##body_content## inside it. This is where your template content will appear.'),
+                            ->content('Design the shell/layout for your emails. In the Unlayer Designer, add a "Custom HTML" block and place {{body_content}} inside it. This is where your template content will appear.'),
                         
                         UnlayerEditor::make('unlayer_state')
                             ->afterStateHydrated(function ($component, $record) {

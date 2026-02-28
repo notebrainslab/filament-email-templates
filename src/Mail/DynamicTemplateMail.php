@@ -10,44 +10,15 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
-use NoteBrainsLab\FilamentEmailTemplates\Traits\HasDynamicEmailTemplate;
+use NoteBrainsLab\FilamentEmailTemplates\Traits\HasEmailTemplate;
 
 class DynamicTemplateMail extends Mailable
 {
-    use Queueable, SerializesModels, HasDynamicEmailTemplate;
+    use Queueable, SerializesModels, HasEmailTemplate;
 
-    public function __construct(public ?string $templateKey = null, public array $data = [])
+    public function __construct(string $templateKey, array $templateVariables = [])
     {
-        if ($this->templateKey) {
-            $this->buildFromTemplate($this->templateKey, $this->data);
-        }
-    }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        if ($this->templateKey) {
-            return new Envelope(
-                subject: $this->resolveTemplateSubject($this->templateKey, $this->data),
-            );
-        }
-        
-        return new Envelope();
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        if ($this->templateKey) {
-            return new Content(
-                html: $this->resolveTemplateHtml($this->templateKey, $this->data),
-            );
-        }
-
-        return new Content();
+        $this->templateKey = $templateKey;
+        $this->templateVariables = $templateVariables;
     }
 }

@@ -1,20 +1,15 @@
 # Filament Email Templates Manager
-A powerful and flexible Email Template Management plugin for Filament v4 and v5.
+A powerful and simple Email Template Management plugin for Filament.
 
-This plugin allows you to manage email templates directly from your Filament panel, bind them to standard Laravel events, and automatically send dynamic emails with full Blade syntax support.
+This plugin allows you to seamlessly manage beautifully designed email themes and templates using an integrated Unlayer editor, and easily send them via Laravel Mailables utilizing a simple Trait.
 
 ## ✨ Features
-- Store email templates in the database.
-- Assign templates to standard Laravel events simply by using their class name.
-- Automatically send emails when events are fired.
-- Access all public properties of the dispatched event inside templates via Blade attributes (e.g. `{{ $user->email }}`).
-- Define dynamic or static recipients, CC, and BCC per event.
-- Define dynamic attachments utilizing model attributes.
-- Full Blade syntax support inside email templates.
+- **Design Themes:** Create reusable design shells (themes) utilizing Unlayer.
+- **Dynamic Templates:** Create standard templates based on your themes and inject content.
+- **Variable Placeholders:** Utilize simple `{{variable_name}}` syntax in subjects and body content.
+- **Seamless Integration:** Use the `HasEmailTemplate` Trait in any Laravel Mailable to automatically fetch and compile the content.
 - Integrated **Unlayer** editor for visual email design.
-- Send emails immediately or delayed (using Laravel Queues).
-- Handle template errors safely with a built-in Exception viewer.
-- Compatible with **Filament v4** & **v5**.
+- Database storage for themes and templates.
 
 ## 🚀 Installation
 
@@ -44,14 +39,6 @@ Publish the config file (optional, if you skipped installation command):
 php artisan vendor:publish --tag="filament-email-templates-config"
 ```
 
-The configuration allows setting your Unlayer Project ID. By default, Unlayer handles a free visual builder locally without storing it remotely.
-
-```php
-return [
-    'unlayer_project_id' => env('UNLAYER_PROJECT_ID', null),
-];
-```
-
 Register the Plugin in your Filament Panel Provider (usually `app/Providers/Filament/AdminPanelProvider.php`):
 
 ```php
@@ -62,57 +49,68 @@ public function panel(Panel $panel): Panel
     return $panel
         // ...
         ->plugins([
-            FilamentEmailTemplatesPlugin::make(),
+            FilamentEmailTemplatesPlugin::make()
+                ->navigationGroup('Email Templates')
+                ->navigationIcon('heroicon-o-envelope')
+                ->navigationSort(5),
         ]);
 }
 ```
 
 ## 💡 Usage
 
-### Managing Templates
-Navigate to the "Settings" section of your Filament Panel and click on "Email Templates".
-- Fill out the basic info: **Name**, **Event Class** (e.g., `App\Events\OrderPlaced`).
-- Build your subject line dynamically (e.g., `Order #{{ $order->id }} Received!`).
-- Add recipients. You can type fixed emails `admin@example.com` or Blade output `{{ $order->user->email }}`.
-- Switch to the "Design" tab. The Unlayer editor will load perfectly. Build your HTML, drag components, and save!
+### 1. Create a Theme
+Navigate to the **Email Templates > Themes** section of your Filament Panel.
+Themes act as the overall shell or layout for your emails.
+1. Give your theme a name and set an Unlayer design.
+2. Inside the Unlayer Designer, add a **"Custom HTML"** block.
+3. Place the exact token `{{body_content}}` inside this HTML block. This acts as the placeholder where your template content will be injected.
 
-### Laravel Events
-Create standard Laravel Events. Ensure that they have *public properties*. The available contexts in Blade are derived from these properties.
+### 2. Create a Template
+Navigate to the **Email Templates > Settings** (or the template resource).
+1. Provide a **Name** and a **Unique Key** (e.g., `welcome_user`). This key will be used to reference the template in your code.
+2. Select a base Theme.
+3. Write your **Subject** and **Body Content**.
+4. You can use variables by utilizing the syntax `{{variable_name}}` (e.g., `Hello {{user_name}}!`). These will be dynamically replaced.
+
+### 3. Integrate with Laravel Mail
+Generate a standard Laravel Mailable class:
+```bash
+php artisan make:mail WelcomeEmail
+```
+
+Use the `HasEmailTemplate` Trait inside your Mailable. You do not need to define `build()`, `envelope()`, or `content()` methods. The Trait handles the rendering automatically.
 
 ```php
-namespace App\Events;
+namespace App\Mail;
 
-use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Order;
+use NoteBrainsLab\FilamentEmailTemplates\Traits\HasEmailTemplate;
 
-class OrderPlaced
+class WelcomeEmail extends Mailable
 {
-    use Dispatchable, SerializesModels;
+    use Queueable, SerializesModels, HasEmailTemplate;
 
-    public Order $order; // Available as {{ $order }} in email template blade
-
-    public function __construct(Order $order)
+    public function __construct(public $user)
     {
-        $this->order = $order;
+        // 1. Define the unique template key from the Filament Panel
+        $this->templateKey = 'welcome_user';
+        
+        // 2. Define the exact array of variables for the {{...}} placeholders
+        $this->templateVariables = [
+            'user_name' => $this->user->name,
+            'order_id'  => 5678,
+        ];
     }
 }
 ```
 
-When you dispatch the event, the package automatically captures it. If a matching active template exists, it will dispatch a queue job to render the blade and attach files, and send it through Laravel Mail.
-
+Then, trigger your email anywhere in your application normally:
 ```php
-OrderPlaced::dispatch($order);
+Mail::to($user->email)->send(new WelcomeEmail($user));
 ```
-
-### Delaying Emails
-In the template editor, you can set a `delay in minutes` value (e.g., 60). Laravel will wait 60 minutes before broadcasting the customized e-mail!
-
-### Exception Handling
-If an email crashes on send (for instance, a typo in the Blade template `{{ $usser->email }}` instead of `{{ $user->email }}`), your application will **NOT** crash. The background Queue will fail to prevent a loop, and the error details alongside the exact payload passed into Blade will be recorded securely in the **Email Template Exceptions** resource, where you can inspect it visually.
-
-## Security Vulnerabilities
-If you discover a security vulnerability within this package, please send an e-mail to NoteBrainsLab via `info@notebrainslab.com`.
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
