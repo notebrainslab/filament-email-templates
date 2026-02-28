@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
@@ -40,8 +41,8 @@ class EmailThemeResource extends Resource
 
                 Components\Section::make('Design')
                     ->schema([
-                        Components\Placeholder::make('design_help')
-                            ->content('Design the shell/layout for your emails here. Use ##body_content## as a placeholder for where the template content will be injected.'),
+                        Placeholder::make('design_help')
+                            ->content('Design the shell/layout for your emails. In the Unlayer Designer, add a "Custom HTML" block and place ##body_content## inside it. This is where your template content will appear.'),
                         
                         UnlayerEditor::make('unlayer_state')
                             ->afterStateHydrated(function ($component, $record) {

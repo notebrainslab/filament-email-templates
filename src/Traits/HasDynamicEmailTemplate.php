@@ -12,15 +12,9 @@ trait HasDynamicEmailTemplate
     /**
      * Get the email template by key and locale.
      */
-    public function getTemplate(string $key, ?string $locale = null): ?EmailTemplate
+    public function getTemplate(string $key): ?EmailTemplate
     {
-        $locale = $locale ?? App::getLocale();
-
         return EmailTemplate::where('key', $key)
-            ->where('locale', $locale)
-            ->where('is_active', true)
-            ->first() ?? EmailTemplate::where('key', $key)
-            ->where('locale', 'en')
             ->where('is_active', true)
             ->first();
     }
@@ -64,32 +58,43 @@ trait HasDynamicEmailTemplate
     }
 
     /**
-     * Initialize the DynamicTemplateMail with parsed content.
+     * Resolve the parsed subject for the template.
      */
-    public function buildFromTemplate(string $key, array $data = [], ?string $locale = null): self
+    public function resolveTemplateSubject(string $key, array $data = []): string
     {
-        $template = $this->getTemplate($key, $locale);
+        $template = $this->getTemplate($key);
+        return $template ? $this->parseTemplateContent($template->subject, $data) : '';
+    }
 
+    /**
+     * Resolve the parsed and themed HTML body for the template.
+     */
+    public function resolveTemplateHtml(string $key, array $data = []): string
+    {
+        $template = $this->getTemplate($key);
         if (!$template) {
-            return $this;
+            return '';
         }
 
-        $subject = $this->parseTemplateContent($template->subject, $data);
         $bodyContent = $this->parseTemplateContent($template->body ?? '', $data);
 
         // Handle Theme
         $theme = $template->theme ?? \NoteBrainsLab\FilamentEmailTemplates\Models\EmailTheme::where('is_default', true)->first();
         
         if ($theme && $theme->body_html) {
-            // Theme acts as the shell/design, bodyContent is injected into it.
-            // Expected placeholder in theme: ##body_content##
-            $bodyHtml = str_replace('##body_content##', $bodyContent, $theme->body_html);
-        } else {
-            $bodyHtml = $bodyContent;
+            return str_replace('##body_content##', $bodyContent, $theme->body_html);
         }
 
-        $this->subject($subject);
-        $this->html($bodyHtml);
+        return $bodyContent;
+    }
+
+    /**
+     * Initialize the DynamicTemplateMail with parsed content (Legacy support).
+     */
+    public function buildFromTemplate(string $key, array $data = []): self
+    {
+        $this->subject($this->resolveTemplateSubject($key, $data));
+        $this->html($this->resolveTemplateHtml($key, $data));
 
         return $this;
     }

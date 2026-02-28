@@ -48,6 +48,9 @@ class MailClassBuilder
 namespace App\Mail\VisualBuilder\EmailTemplates;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use NoteBrainsLab\FilamentEmailTemplates\Mail\DynamicTemplateMail;
 
@@ -59,11 +62,38 @@ class {{ className }} extends DynamicTemplateMail
      * Create a new message instance.
      *
      * @param array \$data Tokens/Variables to replace in the template
-     * @param string|null \$locale Target locale for the template
      */
-    public function __construct(public array \$data = [], ?string \$locale = null)
+    public function __construct(public array \$data = [])
     {
-        parent::__construct('{{ templateKey }}', \$data, \$locale);
+        //
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: \$this->resolveTemplateSubject('{{ templateKey }}', \$this->data),
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            html: \$this->resolveTemplateHtml('{{ templateKey }}', \$this->data),
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }
 PHP;

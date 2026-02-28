@@ -16,12 +16,38 @@ class DynamicTemplateMail extends Mailable
 {
     use Queueable, SerializesModels, HasDynamicEmailTemplate;
 
-    public function __construct(string $templateKey, array $data = [], ?string $locale = null)
+    public function __construct(public ?string $templateKey = null, public array $data = [])
     {
-        $this->buildFromTemplate($templateKey, $data, $locale);
+        if ($this->templateKey) {
+            $this->buildFromTemplate($this->templateKey, $this->data);
+        }
     }
 
-    // Envelope and content are handled by Mailable methods called in the trait,
-    // but we can keep them for older override logic if needed.
-    // However, the trait already calls $this->subject() and $this->html().
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        if ($this->templateKey) {
+            return new Envelope(
+                subject: $this->resolveTemplateSubject($this->templateKey, $this->data),
+            );
+        }
+        
+        return new Envelope();
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        if ($this->templateKey) {
+            return new Content(
+                html: $this->resolveTemplateHtml($this->templateKey, $this->data),
+            );
+        }
+
+        return new Content();
+    }
 }

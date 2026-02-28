@@ -78,7 +78,7 @@ class FilamentEmailTemplatesCommand extends Command
 
         foreach ($templates as $template) {
             \NoteBrainsLab\FilamentEmailTemplates\Models\EmailTemplate::updateOrCreate(
-                ['key' => $template['key'], 'locale' => 'en'],
+                ['key' => $template['key']],
                 [
                     'name' => $template['name'], 
                     'subject' => $template['subject'], 

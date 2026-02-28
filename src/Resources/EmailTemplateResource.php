@@ -62,15 +62,7 @@ class EmailTemplateResource extends Resource
                                     ->helperText('Unique key for this template, used for the Mail Class name.')
                                     ->maxLength(255),
 
-                                Select::make('locale')
-                                    ->options([
-                                        'en' => 'English',
-                                        'es' => 'Spanish',
-                                        'fr' => 'French',
-                                        'de' => 'German',
-                                    ])
-                                    ->default('en')
-                                    ->required(),
+
 
                                 TextInput::make('subject')
                                     ->required()
@@ -84,7 +76,12 @@ class EmailTemplateResource extends Resource
                                 Select::make('theme_id')
                                     ->relationship('theme', 'name')
                                     ->required()
+                                    ->live()
+                                    ->afterStateHydrated(fn ($state, $set) => $set('theme_html', \NoteBrainsLab\FilamentEmailTemplates\Models\EmailTheme::find($state)?->body_html))
+                                    ->afterStateUpdated(fn ($state, $set) => $set('theme_html', \NoteBrainsLab\FilamentEmailTemplates\Models\EmailTheme::find($state)?->body_html))
                                     ->helperText('Select a design theme for this template.'),
+                                
+                                Hidden::make('theme_html'),
                             ])->columns(2),
 
                         Components\Tabs\Tab::make('Content')
@@ -95,6 +92,7 @@ class EmailTemplateResource extends Resource
 
                                 RichEditor::make('body')
                                     ->label('Email Content Body')
+                                    ->live()
                                     ->columnSpanFull(),
                             ]),
                         
@@ -119,9 +117,7 @@ class EmailTemplateResource extends Resource
                 Tables\Columns\TextColumn::make('key')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('locale')
-                    ->badge()
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('subject')
                     ->limit(50),
                 Tables\Columns\IconColumn::make('is_active')
@@ -138,17 +134,11 @@ class EmailTemplateResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('locale')
-                    ->options([
-                        'en' => 'English',
-                        'es' => 'Spanish',
-                        'fr' => 'French',
-                        'de' => 'German',
-                    ]),
+                //
             ])
             ->actions([
                 Actions\EditAction::make(),
-                Tables\Actions\Action::make('build_class')
+                Actions\Action::make('build_class')
                     ->label('Build Class')
                     ->icon('heroicon-m-code-bracket')
                     ->color('success')
