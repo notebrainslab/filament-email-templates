@@ -55,7 +55,6 @@ class FilamentEmailTemplatesPlugin implements Plugin
     {
         $panel->resources([
             EmailTemplateResource::class,
-            Resources\EmailThemeResource::class,
         ]);
     }
 

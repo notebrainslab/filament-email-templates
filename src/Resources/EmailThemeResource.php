@@ -6,9 +6,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -41,37 +39,36 @@ class EmailThemeResource extends Resource
     {
         return $schema
             ->components([
-                Components\Section::make('General')
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->unique(ignoreRecord: true),
-                        Toggle::make('is_default')
-                            ->label('Default Theme')
-                            ->helperText('This theme will be used if no theme is assigned to a template.'),
-                    ])->columns(2),
+                Components\Tabs::make('Tabs')
+                    ->tabs([
+                        Components\Tabs\Tab::make('General')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->required()
+                                    ->unique(ignoreRecord: true),
+                                Toggle::make('is_default')
+                                    ->label('Default Theme')
+                                    ->helperText('This theme will be used if no theme is assigned to a template.'),
+                            ])->columns(2),
 
-                Components\Section::make('Design')
-                    ->schema([
-                        Placeholder::make('design_help')
-                            ->content('Design the shell/layout for your emails. In the Unlayer Designer, add a "Custom HTML" block and place {{body_content}} inside it. This is where your template content will appear.'),
-                        
-                        UnlayerEditor::make('unlayer_state')
-                            ->afterStateHydrated(function ($component, $record) {
-                                if ($record) {
-                                    $component->state([
-                                        'json' => $record->body_json,
-                                        'html' => $record->body_html,
-                                    ]);
-                                }
-                            })
-                            ->dehydrated(false)
-                            ->columnSpanFull()
-                            ->label('Theme Designer (Unlayer)'),
-                        
-                        Hidden::make('body_html'),
-                        Hidden::make('body_json'),
-                    ]),
+                        Components\Tabs\Tab::make('Design')
+                            ->schema([
+                                Placeholder::make('design_help')
+                                    ->content('Design the shell/layout for your emails. In the Unlayer Designer, add a "Custom HTML" block and place {{body_content}} inside it. This is where your template content will appear.'),
+                                    
+                                UnlayerEditor::make('unlayer_state')
+                                    ->formatStateUsing(function ($record) {
+                                        if (!$record) return null;
+                                        return json_encode([
+                                            'design' => $record->body_json,
+                                            'html' => $record->body_html,
+                                        ]);
+                                    })
+                                    ->columnSpanFull()
+                                    ->label('Theme Designer (Unlayer)'),
+                            ]),
+                    ])
+                    ->columnSpanFull()
             ]);
     }
 

@@ -11,11 +11,13 @@ class CreateEmailTheme extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (isset($data['unlayer_state'])) {
-            $data['body_json'] = $data['unlayer_state']['json'] ?? null;
-            $data['body_html'] = $data['unlayer_state']['html'] ?? null;
-            unset($data['unlayer_state']);
+        if (!empty($data['unlayer_state']) && is_string($data['unlayer_state'])) {
+            $parsed = json_decode($data['unlayer_state'], true);
+            $data['body_json'] = $parsed['design'] ?? null;
+            $data['body_html'] = $parsed['html'] ?? null;
         }
+
+        unset($data['unlayer_state']);
 
         return $data;
     }

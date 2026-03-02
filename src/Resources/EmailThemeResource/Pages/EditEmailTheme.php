@@ -17,13 +17,26 @@ class EditEmailTheme extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->getRecord();
+        $data['unlayer_state'] = json_encode([
+            'design' => $record->body_json ?? null,
+            'html'   => $record->body_html ?? null,
+        ]);
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (isset($data['unlayer_state'])) {
-            $data['body_json'] = $data['unlayer_state']['json'] ?? null;
-            $data['body_html'] = $data['unlayer_state']['html'] ?? null;
-            unset($data['unlayer_state']);
+        if (!empty($data['unlayer_state']) && is_string($data['unlayer_state'])) {
+            $parsed = json_decode($data['unlayer_state'], true);
+            $data['body_json'] = $parsed['design'] ?? null;
+            $data['body_html'] = $parsed['html'] ?? null;
         }
+
+        unset($data['unlayer_state']);
 
         return $data;
     }

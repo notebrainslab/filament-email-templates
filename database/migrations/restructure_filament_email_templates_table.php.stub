@@ -1,0 +1,51 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('filament_email_templates', function (Blueprint $table) {
+            // Drop theme FK if exists
+            if (Schema::hasColumn('filament_email_templates', 'theme_id')) {
+                $table->dropForeign(['theme_id']);
+                $table->dropColumn('theme_id');
+            }
+
+            // Drop old plain text body if exists
+            if (Schema::hasColumn('filament_email_templates', 'body')) {
+                $table->dropColumn('body');
+            }
+
+            // Event that triggers this email (e.g. Illuminate\Auth\Events\Registered)
+            $table->string('event')->nullable()->after('key');
+
+            // JSON array of recipient types: ['user', 'inviter', ...]
+            $table->json('recipients')->nullable()->after('event');
+
+            // JSON array of attachment keys
+            $table->json('attachments')->nullable()->after('recipients');
+
+            // Delay in minutes before sending
+            $table->unsignedInteger('delay_minutes')->default(0)->after('attachments');
+
+            // Full Unlayer HTML (the rendered email)
+            $table->longText('body_html')->nullable()->after('subject');
+
+            // Unlayer JSON design state
+            $table->json('body_json')->nullable()->after('body_html');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('filament_email_templates', function (Blueprint $table) {
+            $table->dropColumn(['event', 'recipients', 'attachments', 'delay_minutes', 'body_html', 'body_json']);
+            $table->longText('body')->nullable();
+            $table->foreignId('theme_id')->nullable()->constrained('filament_email_themes')->nullOnDelete();
+        });
+    }
+};

@@ -3,8 +3,6 @@
 namespace NoteBrainsLab\FilamentEmailTemplates\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailTemplate extends Model
 {
@@ -13,11 +11,9 @@ class EmailTemplate extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'   => 'boolean',
+        'recipients'  => 'array',
+        'attachments' => 'array',
+        'body_json'   => 'array',
     ];
-
-    public function theme(): BelongsTo
-    {
-        return $this->belongsTo(EmailTheme::class, 'theme_id');
-    }
 }
