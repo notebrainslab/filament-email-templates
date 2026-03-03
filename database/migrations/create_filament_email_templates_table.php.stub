@@ -6,23 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('filament_email_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('key')->unique()->index();
             $table->string('subject');
-            
-            // Unlayer Exports
-            $table->longText('body_html')->nullable();
-            $table->json('body_json')->nullable();
+
+            // Unlayer visual editor exports
+            $table->longText('body_html')->nullable(); // Rendered HTML email
+            $table->json('body_json')->nullable();     // Unlayer design JSON (for re-editing)
 
             $table->timestamps();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('filament_email_templates');
     }

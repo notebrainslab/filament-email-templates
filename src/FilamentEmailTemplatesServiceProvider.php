@@ -20,7 +20,6 @@ class FilamentEmailTemplatesServiceProvider extends PackageServiceProvider
             ->hasConfigFile('filament-email-templates')
             ->hasViews('filament-email-templates')
             ->hasMigration('create_filament_email_templates_table')
-            ->hasMigration('restructure_filament_email_templates_table') // new unified schema
             ->hasCommand(FilamentEmailTemplatesCommand::class);
     }
 }

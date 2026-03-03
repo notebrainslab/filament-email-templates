@@ -90,7 +90,7 @@ To enable the **Dark Theme** and **Image Uploads** in the Unlayer editor, you mu
 3. Add it to your `.env`:
 
 ```env
-UNLAYER_PROJECT_ID=284783
+UNLAYER_PROJECT_ID=YOUR_PROJECT_ID
 ```
 
 > **Note:** Even without a Project ID, the editor works fine for designing and saving templates. The only limitation is that dark mode isn’t available. For now, I’ve used a placeholder Project ID to enable dark mode. That said, I recommend creating a free developer account and using your own Project ID for proper configuration and long-term use.
